@@ -26,8 +26,6 @@ public class Crawler implements Loggeable {
     public static final String URL = "http://bollystop.tv";
 
     static {
-        System.setProperty("socksProxyHost", "127.0.0.1");
-        System.setProperty("socksProxyPort", "9050");
         System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "20");
     }
 

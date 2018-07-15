@@ -18,7 +18,8 @@ public class VideoLinkLoader implements Loggeable {
 
     public final static VideoLinkLoader INS = new VideoLinkLoader();
 
-    private VideoLinkLoader() {}
+    private VideoLinkLoader() {
+    }
 
     public Episode get(Episode episode) {
         try {
@@ -30,20 +31,23 @@ public class VideoLinkLoader implements Loggeable {
             }
             final String link = elements.get(0).attr("href");
             final String html = UTIL.getHTML(link, List.of(new BasicHeader("Referer", episode.getVideoUrl())));
-            final int index = html.indexOf("goodyaar.com");
+            int index = html.indexOf("goodyaar.com");
             if (index == -1) {
-                logger().warn("Couldn't find episodes for " + episode + " reason: goodyaar.com video url not found.");
-                return null;
+                index = html.indexOf("bollywoodjoint.com");
+                if (index == -1) {
+                    logger().warn("Couldn't find goodyaar or bollywoodjoint video in [" + link + "] from [" + episode.getVideoUrl() + "]");
+                    return null;
+                }
             }
             int x = index, y = index;
             while (x > 0 && html.charAt(x - 1) != '"')
                 x--;
             while (y < html.length() && html.charAt(y) != '"')
                 y++;
-            
+
             final String videoUrl = html.substring(x, y);
             logger().info("Successfully got video url for: " + episode + " --> " + videoUrl);
-            
+
             episode.setVideoUrl(videoUrl);
             episode.setHash(UUID.nameUUIDFromBytes(videoUrl.getBytes()).toString());
             return episode;

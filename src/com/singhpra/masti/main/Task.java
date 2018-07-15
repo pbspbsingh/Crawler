@@ -3,6 +3,7 @@ package com.singhpra.masti.main;
 import java.io.File;
 import java.util.Date;
 
+import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.singhpra.masti.Crawler;
@@ -11,6 +12,8 @@ import com.singhpra.masti.common.Loggeable;
 public class Task implements Loggeable {
 
     public static final String FILE_NAME = "./data/serials.json";
+
+    private static final long MIN_10 = 10 * 60 * 1000L;
 
     private final long waitTime;
 
@@ -36,8 +39,9 @@ public class Task implements Loggeable {
                 new Crawler().start();
             } else {
                 logger().info("File was last updated: " + readable(diff) + " ago.");
-                logger().info("Let's wait for " + readable(waitTime - diff) + " before we start again.");
-                Thread.sleep(waitTime - diff);
+                final long sleepDuration = (waitTime - diff) < MIN_10 ? (waitTime - diff) : MIN_10;
+                logger().info("Let's wait for " + readable(sleepDuration) + " before we start again.");
+                Thread.sleep(sleepDuration);
             }
         }
     }
@@ -50,6 +54,8 @@ public class Task implements Loggeable {
             return String.format("%d hours, %2.2f minutes", (int) time / 60, time % 60);
     }
 
+    private static final Log LOG = LogFactory.getLog(Task.class);
+
     public static void main(String[] args) {
         try {
             final int waitTime;
@@ -58,9 +64,23 @@ public class Task implements Loggeable {
             } else {
                 waitTime = 6;
             }
+            boolean useProxy = true;
+            int port = 9050;
+            if (args.length > 1)
+                useProxy = Boolean.parseBoolean(args[1]);
+            if (args.length > 2)
+                port = Integer.parseInt(args[2]);
+
+            LOG.info("Use proxy is: " + useProxy + ", with port: " + port);
+            if (useProxy) {
+                LOG.info("System is set to use socks proxy: 127.0.0.1:" + port);
+                System.setProperty("socksProxyHost", "127.0.0.1");
+                System.setProperty("socksProxyPort", String.valueOf(port));
+            }
+
             new Task(waitTime).run();
         } catch (Exception e) {
-            LogFactory.getLog(Task.class).error(e);
+            LOG.error(e);
         }
     }
 
