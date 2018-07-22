@@ -46,8 +46,12 @@ public class VideoLinkLoader implements Loggeable {
                 y++;
 
             final String videoUrl = html.substring(x, y);
+            final int headStatusCode = UTIL.head(videoUrl, List.of(new BasicHeader("Referer", episode.getVideoUrl())));
+            if (headStatusCode != 200) {
+                logger().warn("Video URL: " + videoUrl + " is not working, status code: " + headStatusCode);
+                return null;
+            }
             logger().info("Successfully got video url for: " + episode + " --> " + videoUrl);
-
             episode.setVideoUrl(videoUrl);
             episode.setHash(UUID.nameUUIDFromBytes(videoUrl.getBytes()).toString());
             return episode;

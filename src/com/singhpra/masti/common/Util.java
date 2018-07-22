@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
@@ -61,7 +62,22 @@ public class Util implements Loggeable {
             return EntityUtils.toString(response.getEntity());
         }
     }
-    
+
+    public int head(String url) throws IOException {
+        return head(url, List.of());
+    }
+
+    public int head(String url, List<Header> headers) throws IOException {
+        final HttpHead head = new HttpHead(url);
+        if (!(headers == null || headers.isEmpty())) {
+            for (Header header : headers)
+                head.addHeader(header);
+        }
+        try (CloseableHttpResponse response = httpClient.execute(head)) {
+            return response.getStatusLine().getStatusCode();
+        }
+    }
+
     public void writeJSONFile(Object src, String file) throws IOException {
         try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(file))) {
             gson.toJson(src, writer);
