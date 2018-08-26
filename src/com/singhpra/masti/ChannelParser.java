@@ -25,7 +25,7 @@ public class ChannelParser implements Loggeable {
         try {
             final Document document = Jsoup.parse(UTIL.getHTML(url), url);
             final Elements elements = document.select(".chennel_list .serial_list .serial_img a");
-            logger().info("Number of episodes of " + elements.size());
+            logger().info("Number of chennels found: " + elements.size());
             return elements.stream().map(e -> e.attr("href")).collect(Collectors.toList());
         } catch (IOException e) {
             logger().error("Error while fetching channel list", e);

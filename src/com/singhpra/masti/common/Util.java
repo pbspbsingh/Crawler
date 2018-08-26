@@ -68,4 +68,12 @@ public class Util implements Loggeable {
         }
     }
 
+    public String readable(final long timestamp) {
+        double time = timestamp * 1.0 / (1000 * 60);
+        if (time <= 60)
+            return String.format("%2.2f minutes", time);
+        else
+            return String.format("%d hours, %2.2f minutes", (int) time / 60, time % 60);
+    }
+
 }

@@ -80,7 +80,7 @@ public class Crawler implements Loggeable {
             logger().error("Error while crawling.", e);
             throw e;
         }
-        logger().info("Time taken to download serials info: " + (System.currentTimeMillis() - startTime));
+        logger().info("Time taken to download serials info: " + UTIL.readable((System.currentTimeMillis() - startTime)));
     }
 
     private Set<String> interesedSerials() throws IOException {

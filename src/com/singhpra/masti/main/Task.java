@@ -1,5 +1,7 @@
 package com.singhpra.masti.main;
 
+import static com.singhpra.masti.common.Util.UTIL;
+
 import java.io.File;
 import java.util.Date;
 
@@ -22,7 +24,7 @@ public class Task implements Loggeable {
     }
 
     public void run() throws Exception {
-        logger().info("Starting crawler task with wait time: " + readable(waitTime));
+        logger().info("Starting crawler task with wait time: " + UTIL.readable(waitTime));
 
         while (true) {
             final File file = new File(FILE_NAME);
@@ -35,23 +37,15 @@ public class Task implements Loggeable {
             final long lastModified = file.exists() ? file.lastModified() : 0L;
             final long diff = System.currentTimeMillis() - lastModified;
             if (diff >= waitTime) {
-                logger().info("Last modified was earlier than " + readable(waitTime) + ", so crawling now.");
+                logger().info("Last modified was earlier than " + UTIL.readable(waitTime) + ", so crawling now.");
                 new Crawler().start();
             } else {
-                logger().info("File was last updated: " + readable(diff) + " ago.");
+                logger().info("File was last updated: " + UTIL.readable(diff) + " ago.");
                 final long sleepDuration = (waitTime - diff) < MIN_10 ? (waitTime - diff) : MIN_10;
-                logger().info("Let's wait for " + readable(sleepDuration) + " before we start again.");
+                logger().info("Let's wait for " + UTIL.readable(sleepDuration) + " before we check again.");
                 Thread.sleep(sleepDuration);
             }
         }
-    }
-
-    private String readable(final long timestamp) {
-        double time = timestamp * 1.0 / (1000 * 60);
-        if (time <= 60)
-            return String.format("%2.2f minutes", time);
-        else
-            return String.format("%d hours, %2.2f minutes", (int) time / 60, time % 60);
     }
 
     private static final Log LOG = LogFactory.getLog(Task.class);
