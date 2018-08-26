@@ -27,15 +27,15 @@ public class EpisodeParser implements Loggeable {
         logger().info("Starting processing of serial: " + serial.getTitle() + " url: " + serial.getHref());
         try {
             final Document document = Jsoup.parse(UTIL.getHTML(serial.getHref()), serial.getHref());
-            final Elements elements = document.select(".full_episode ul li");
+            final Elements elements = document.select("ul.full_episode li");
             logger().info("Number of episodes of " + serial.getTitle() + " are " + elements.size());
 
             final List<Episode> list = new ArrayList<>(elements.size());
             for (Element element : elements) {
                 final Episode episode = new Episode();
                 episode.setSerialKey(serial.getKey());
-                episode.setDate(element.select(".episode_date").text());
-                episode.setVideoUrl(element.select("a.body-link").attr("href"));
+                episode.setDate(element.select("a.date_episodes").text());
+                episode.setVideoUrl(element.select("a.date_episodes").attr("href"));
                 list.add(episode);
             }
             return list;

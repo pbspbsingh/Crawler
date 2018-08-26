@@ -56,23 +56,34 @@ public class Episode implements Comparable<Episode> {
     }
 
     public Date parseDate() throws ParseException {
-        String date = this.date;
+        String[] dates = this.date.split(" ");
+        if (date.length() < 2)
+            throw new ParseException("Coudln't parse date: " + this.date, 0);
+
+        final int days = parseDays(dates[0]);
         int selectedMonth = -1;
-        for (String month : MONTHS.keySet()) {
-            if (date.contains(month)) {
+        for (String month : MONTHS.keySet())
+            if (dates[1].equalsIgnoreCase(month)) {
                 selectedMonth = MONTHS.get(month);
-                date = date.replace(month, String.format("%02d", selectedMonth));
                 break;
             }
-        }
         final Calendar cal = Calendar.getInstance();
         int year = cal.get(Calendar.YEAR);
         if (selectedMonth > (cal.get(Calendar.MONTH) + 1)) {
             year -= 1;
         }
-        date += " " + year;
 
-        return DATE_FORMAT.parse(date);
+        return DATE_FORMAT.parse(String.format("%d %02d %d", days, selectedMonth, year));
+    }
+
+    private static int parseDays(String str) {
+        int days = 0;
+        for (int i = 0; i < str.length(); i++) {
+            if (!Character.isDigit(str.charAt(i)))
+                break;
+            days = 10 * days + str.charAt(i) - '0';
+        }
+        return days;
     }
 
     @Override

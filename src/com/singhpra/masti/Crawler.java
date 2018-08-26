@@ -23,7 +23,7 @@ import com.singhpra.masti.modal.Serial;
 
 public class Crawler implements Loggeable {
 
-    public static final String URL = "http://bollystop.tv";
+    private static final String URL = "http://apnetv.tv/Hindi-Serials";
 
     static {
         System.setProperty("java.util.concurrent.ForkJoinPool.common.parallelism", "20");
@@ -33,8 +33,12 @@ public class Crawler implements Loggeable {
         final long startTime = System.currentTimeMillis();
         logger().info("Starting crawler with URL: " + URL);
         try {
-            final SerialParser serialParser = new SerialParser(URL);
-            final List<Serial> serials = serialParser.parse();
+            final List<String> channels = new ChannelParser(URL).getChannels();
+            final List<Serial> serials = channels.parallelStream()
+                                                .map(SerialParser::new)
+                                                .map(SerialParser::parse)
+                                                .flatMap(List::stream)
+                                                .collect(Collectors.toList());
             logger().info("Total number of serials fetched: " + serials.size());
             
             UTIL.writeJSONFile(serials, "./data/all.json");
@@ -88,5 +92,9 @@ public class Crawler implements Loggeable {
                         .filter(emptyCheck.negate())
                         .collect(Collectors.toUnmodifiableSet()) 
                 : Set.of();
+    }
+
+    public static void main(String[] args) throws Exception {
+        new Crawler().start();
     }
 }

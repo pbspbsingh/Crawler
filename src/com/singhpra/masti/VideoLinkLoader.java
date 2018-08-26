@@ -18,8 +18,9 @@ public class VideoLinkLoader implements Loggeable {
 
     public final static VideoLinkLoader INS = new VideoLinkLoader();
 
-    private VideoLinkLoader() {
-    }
+    private static final List<String> VIDEO_HOSTS = List.of("goodyaar.com", "bollywoodjoint.com", "indiaswag.com");
+
+    private VideoLinkLoader() {}
 
     public Episode get(Episode episode) {
         try {
@@ -31,14 +32,12 @@ public class VideoLinkLoader implements Loggeable {
             }
             final String link = elements.get(0).attr("href");
             final String html = UTIL.getHTML(link, List.of(new BasicHeader("Referer", episode.getVideoUrl())));
-            int index = html.indexOf("goodyaar.com");
+            int index = searchVideoHosts(html);
             if (index == -1) {
-                index = html.indexOf("bollywoodjoint.com");
-                if (index == -1) {
-                    logger().warn("Couldn't find goodyaar or bollywoodjoint video in [" + link + "] from [" + episode.getVideoUrl() + "]");
-                    return null;
-                }
+                logger().warn("Couldn't find video-host in [" + link + "] from ["+ episode.getVideoUrl() + "]");
+                return null;
             }
+
             int x = index, y = index;
             while (x > 0 && html.charAt(x - 1) != '"')
                 x--;
@@ -55,6 +54,16 @@ public class VideoLinkLoader implements Loggeable {
             logger().warn("Failed to load video link: " + episode + ": reason " + e.getMessage());
             return null;
         }
+    }
+
+    private int searchVideoHosts(final String html) {
+        int index = -1;
+        for (String host : VIDEO_HOSTS) {
+            index = html.indexOf(host);
+            if (index > 0)
+                return index;
+        }
+        return index;
     }
 
 }
